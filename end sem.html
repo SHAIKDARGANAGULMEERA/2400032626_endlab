@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Student Course List App</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f7f7f7;
+        }
+
+        .action-btns button {
+            padding: 6px 10px;
+            margin: 2px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #f0ad4e;
+        }
+
+        .delete-btn {
+            background: #d9534f;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="container">
+        <h2>Advanced Student Course List</h2>
+
+        <label>Student Name:</label>
+        <input type="text" id="studentName" placeholder="Enter student name">
+
+        <label>Select Course:</label>
+        <select id="course">
+            <option value="">-- Select Course --</option>
+            <option>HTML</option>
+            <option>CSS</option>
+            <option>JavaScript</option>
+            <option>Python</option>
+            <option>Java</option>
+        </select>
+
+        <button onclick="addOrUpdateStudent()">Save Student</button>
+
+        <table id="studentTable">
+            <tr>
+                <th>Student Name</th>
+                <th>Course</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+
+    </div>
+
+    <script>
+        let editIndex = -1;
+
+        function loadStudents() {
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            let table = document.getElementById("studentTable");
+
+            // Clear previous rows except header
+            table.innerHTML = `
+                <tr>
+                    <th>Student Name</th>
+                    <th>Course</th>
+                    <th>Actions</th>
+                </tr>
+            `;
+
+            students.forEach((student, index) => {
+                let row = table.insertRow();
+                row.insertCell(0).innerHTML = student.name;
+                row.insertCell(1).innerHTML = student.course;
+
+                let actionCell = row.insertCell(2);
+                actionCell.innerHTML = `
+                    <div class="action-btns">
+                        <button class="edit-btn" onclick="editStudent(${index})">Edit</button>
+                        <button class="delete-btn" onclick="deleteStudent(${index})">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addOrUpdateStudent() {
+            let name = document.getElementById("studentName").value;
+            let course = document.getElementById("course").value;
+
+            if (name === "" || course === "") {
+                alert("Please enter all details");
+                return;
+            }
+
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+
+            if (editIndex === -1) {
+                students.push({ name, course });
+            } else {
+                students[editIndex] = { name, course };
+                editIndex = -1;
+            }
+
+            localStorage.setItem("students", JSON.stringify(students));
+
+            document.getElementById("studentName").value = "";
+            document.getElementById("course").value = "";
+
+            loadStudents();
+        }
+
+        function editStudent(index) {
+            let students = JSON.parse(localStorage.getItem("students"));
+            document.getElementById("studentName").value = students[index].name;
+            document.getElementById("course").value = students[index].course;
+            editIndex = index;
+        }
+
+        function deleteStudent(index) {
+            let students = JSON.parse(localStorage.getItem("students"));
+            students.splice(index, 1);
+            localStorage.setItem("students", JSON.stringify(students));
+            loadStudents();
+        }
+
+        // Load data on page load
+        window.onload = loadStudents;
+    </script>
+
+</body>
+</html>
